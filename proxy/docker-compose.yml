@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  reverse-proxy:
+    image: traefik:v2.0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - traefik-logs:/log
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+    configs:
+      - source: traefik-config
+        target: ./traefik.toml
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+      - target: 8080
+        published: 8080
+        mode: host
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    name: traefik-proxy
+    driver: overlay
+
+configs:
+  traefik-config:
+    file: ./traefik.toml
+
+volumes:
+  traefik-logs: {}

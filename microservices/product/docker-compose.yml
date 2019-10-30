@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  product-api:
+    image: 3auris/auction-product
+    deploy:
+      labels:
+        - traefik.http.routers.product-api.rule=PathPrefix(`/v1/product/`)
+        - traefik.http.services.product-api.loadbalancer.healthcheck.path=/v1/product/health
+        - traefik.http.services.product-api.loadbalancer.server.port=3000
+    networks:
+      - traefik-proxy
+networks:
+  traefik-proxy:
+    external: true

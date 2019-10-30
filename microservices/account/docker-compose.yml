@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  account-api:
+    image: 3auris/auction-account
+    deploy:
+      labels:
+        - traefik.http.routers.account-api.rule=PathPrefix(`/v1/account/`)
+        - traefik.http.services.account-api.loadbalancer.healthcheck.path=/v1/account/health
+        - traefik.http.services.account-api.loadbalancer.server.port=3000
+    networks:
+      - traefik-proxy
+networks:
+  traefik-proxy:
+    external: true

@@ -1,0 +1,22 @@
+[global]
+  checkNewVersion = true
+  sendAnonymousUsage = true
+
+[providers]
+  [providers.docker]
+    watch = true
+    endpoint = "unix:///var/run/docker.sock"
+    exposedByDefault = true
+    swarmMode = true
+
+[api]
+  insecure = true
+  dashboard = true
+  debug = true
+
+[log]
+  level = "error"
+  filePath = "/log/traefik.log"
+
+[accessLog]
+  filePath = "/log/access.log"

@@ -1,0 +1,62 @@
+version: 2
+jobs:
+  product-image:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          command: |
+            cd microservices/product
+            docker build -t 3auris/auction-product .
+            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+            docker push 3auris/auction-product
+  account-image:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          command: |
+            cd microservices/account
+            docker build -t 3auris/auction-account .
+            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+            docker push 3auris/auction-account
+  deploy:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "24:e4:e0:90:fe:f5:d4:e4:40:f0:b2:fe:52:5f:85:d2"
+      - checkout
+      - setup_remote_docker
+      - run:
+          command: |
+            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/ca.pem.gpg > ./cert/ca.pem
+            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/key.pem.gpg > ./cert/key.pem
+            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/cert.pem.gpg > ./cert/cert.pem
+            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./proxy/docker-compose.yml auction
+            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/account/docker-compose.yml auction
+            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/product/docker-compose.yml auction
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - account-image:
+          filters:
+            branches:
+              only: master
+      - product-image:
+          filters:
+            branches:
+              only: master
+      - deploy:
+          requires:
+            - account-image
+            - product-image
+          filters:
+            branches:
+              only: master
