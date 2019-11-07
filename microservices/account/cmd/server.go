@@ -16,11 +16,9 @@ func main() {
 
 	router := mux.NewRouter()
 
-	api := account.Server{
-		StringGenerator: token.Token{},
-	}
+	api := account.Server{}
 
-	router.HandleFunc(prefix+"/authenticate", api.HandleAuthentication()).Methods(http.MethodPost)
+	router.HandleFunc(prefix+"/authenticate", api.HandleAuthentication(token.Token{})).Methods(http.MethodPost)
 	router.HandleFunc(prefix+"/health", alive).Methods(http.MethodGet)
 	router.HandleFunc(prefix+"/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)

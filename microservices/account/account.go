@@ -10,11 +10,9 @@ type StringGenerator interface {
 	Generate() string
 }
 
-type Server struct {
-	StringGenerator StringGenerator
-}
+type Server struct{}
 
-func (s Server) HandleAuthentication() http.HandlerFunc {
+func (s Server) HandleAuthentication(sg StringGenerator) http.HandlerFunc {
 	type AuthenticationRequest struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -40,7 +38,7 @@ func (s Server) HandleAuthentication() http.HandlerFunc {
 		w.WriteHeader(200)
 
 		response := AuthenticationResponse{
-			Token:  s.StringGenerator.Generate(),
+			Token:  sg.Generate(),
 			Expire: "2021-01-01",
 			User:   NewUser(request.Email),
 			New:    true,
