@@ -74,7 +74,6 @@ services:
       - prometheus
     volumes:
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning/:/etc/grafana/provisioning/
     configs:
       - source: grafana-config
         target: /etc/grafana/grafana.ini
