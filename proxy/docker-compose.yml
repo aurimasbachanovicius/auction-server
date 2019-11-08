@@ -13,6 +13,8 @@ configs:
     file: ./traefik.toml
   grafana-config:
     file: ./grafana.ini
+  prometheus-config:
+    file: ./prometheus.yml
 
 volumes:
   traefik-logs: {}
@@ -47,9 +49,10 @@ services:
 
   prometheus:
     image: prom/prometheus
+    depends_on:
+      - reverse-proxy
     volumes:
       - prometheus-data:/prometheus
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -57,8 +60,6 @@ services:
       - '--web.external-url=http://localhost/prometheus'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.enable-lifecycle'
-    networks:
-      - monitoring
     deploy:
       labels:
         - traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)
@@ -66,8 +67,11 @@ services:
       placement:
         constraints:
           - node.role==manager
-    depends_on:
-      - reverse-proxy
+    configs:
+      - source: prometheus-config
+        target: /etc/prometheus/prometheus.yml
+    networks:
+      - monitoring
 
   grafana:
     image: grafana/grafana
@@ -76,15 +80,8 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
       - grafana-profisioning-data:/etc/grafana/provisioning/
-    configs:
-      - source: grafana-config
-        target: /etc/grafana/grafana.ini
     command:
       - '--config=/etc/grafana/grafana.ini'
-    networks:
-      - monitoring
-    environment:
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana
     deploy:
       placement:
         constraints:
@@ -93,3 +90,10 @@ services:
         - traefik.http.middlewares.grafana.stripprefix.prefixes=/grafana/,/grafana,/grafana/login,grafana
         - traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)
         - traefik.http.services.grafana.loadbalancer.server.port=3000
+    configs:
+      - source: grafana-config
+        target: /etc/grafana/grafana.ini
+    networks:
+      - monitoring
+    environment:
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana
