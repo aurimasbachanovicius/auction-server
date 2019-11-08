@@ -18,6 +18,7 @@ volumes:
   traefik-logs: {}
   prometheus-data: {}
   grafana-data: {}
+  grafana-profisioning-data: {}
 
 services:
   reverse-proxy:
@@ -74,6 +75,7 @@ services:
       - prometheus
     volumes:
       - grafana-data:/var/lib/grafana
+      - grafana-profisioning-data:/etc/grafana/provisioning/
     configs:
       - source: grafana-config
         target: /etc/grafana/grafana.ini

@@ -35,6 +35,7 @@ jobs:
       - setup_remote_docker
       - run:
           command: |
+            pwd
             ls proxy
             ls microservices
       - run:
