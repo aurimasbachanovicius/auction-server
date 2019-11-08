@@ -20,3 +20,6 @@
 
 [accessLog]
   filePath = "/log/access.log"
+
+[metrics]
+  [metrics.prometheus]

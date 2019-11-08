@@ -1,5 +1,24 @@
 version: '3.7'
 
+networks:
+  traefik:
+    name: traefik-proxy
+    driver: overlay
+  monitoring:
+    name: monitoring-network
+    driver: overlay
+
+configs:
+  traefik-config:
+    file: ./traefik.toml
+  grafana-config:
+    file: ./grafana.ini
+
+volumes:
+  traefik-logs: {}
+  prometheus-data: {}
+  grafana-data: {}
+
 services:
   reverse-proxy:
     image: traefik:v2.0
@@ -23,15 +42,53 @@ services:
         mode: host
     networks:
       - traefik
+      - monitoring
 
-networks:
-  traefik:
-    name: traefik-proxy
-    driver: overlay
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - prometheus-data:/prometheus
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.external-url=http://localhost/prometheus'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitoring
+    deploy:
+      labels:
+        - traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)
+        - traefik.http.services.prometheus.loadbalancer.server.port=9090
+      placement:
+        constraints:
+          - node.role==manager
+    depends_on:
+      - reverse-proxy
 
-configs:
-  traefik-config:
-    file: ./traefik.toml
-
-volumes:
-  traefik-logs: {}
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    configs:
+      - source: grafana-config
+        target: /etc/grafana/grafana.ini
+    command:
+      - '--config=/etc/grafana/grafana.ini'
+    networks:
+      - monitoring
+    environment:
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana
+    deploy:
+      placement:
+        constraints:
+          - node.role==manager
+      labels:
+        - traefik.http.middlewares.grafana.stripprefix.prefixes=/grafana/,/grafana,/grafana/login,grafana
+        - traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)
+        - traefik.http.services.grafana.loadbalancer.server.port=3000
