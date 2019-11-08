@@ -87,7 +87,6 @@ services:
         constraints:
           - node.role==manager
       labels:
-        - traefik.http.middlewares.grafana.stripprefix.prefixes=/grafana/,/grafana,/grafana/login,grafana
         - traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)
         - traefik.http.services.grafana.loadbalancer.server.port=3000
     configs:
