@@ -1,4 +1,4 @@
-module account
+module github.com/3auris/auction-server
 
 go 1.12
 

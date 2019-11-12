@@ -1,10 +1,11 @@
 package app
 
 import (
-	"account/internal/user"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/3auris/auction-server/internal/user"
 )
 
 func (s Server) handleAuthentication() http.HandlerFunc {

@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           command: |
-            (cd microservices/account && go test)
+            (cd microservices/account && go test ./../...)
             (cd microservices/product && go test)
   product-image:
     docker:

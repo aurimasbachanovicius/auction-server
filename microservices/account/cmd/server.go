@@ -1,11 +1,11 @@
 package main
 
 import (
-	"account/app"
 	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/3auris/auction-server/app"
 	"github.com/gorilla/handlers"
 )
 
