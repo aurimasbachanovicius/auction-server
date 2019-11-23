@@ -1,5 +1,7 @@
 package user
 
+import "crypto/rand"
+
 type Token string
 
 type Session struct {
@@ -22,4 +24,11 @@ func NewSession() Session {
 type SessionStorage interface {
 	Get(token Token) *Session
 	Add(session Session)
+}
+
+func generateToken() string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+
+	return string(b)
 }
