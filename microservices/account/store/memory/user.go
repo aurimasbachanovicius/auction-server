@@ -29,15 +29,12 @@ func NewUserMemoryStorage() *UserMemoryStorage {
 }
 
 func (u UserMemoryStorage) GetByEmail(email string) *user.User {
-	var usr user.User
-	usr = u.users[email]
+	usr := u.users[email]
 	return &usr
 }
 
 func (u UserMemoryStorage) Get(token user.Token) *user.Session {
-	var session user.Session
-	session = u.sessions[token]
-
+	session := u.sessions[token]
 	return &session
 }
 

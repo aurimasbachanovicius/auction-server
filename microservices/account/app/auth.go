@@ -14,12 +14,13 @@ func (app App) Auth(email string, pass string) (error, *user.Session) {
 	}
 
 	password := app.store.UserPassword.GetByEmail(email)
-	if password.IsMatch(pass) == false {
+	if !password.IsMatch(pass) {
 		return errors.New("could not match password"), nil
 	}
 
 	session := user.NewSession();
 	app.store.UserSession.Add(session)
+
 
 	return nil, &session
 }

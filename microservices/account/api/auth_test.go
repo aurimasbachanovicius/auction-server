@@ -3,11 +3,12 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/3auris/auction-server/app"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/3auris/auction-server/app"
 )
 
 func TestServer_handleAuthentication(t *testing.T) {
