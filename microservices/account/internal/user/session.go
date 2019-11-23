@@ -1,6 +1,9 @@
 package user
 
-import "crypto/rand"
+import (
+	"math/rand"
+	"time"
+)
 
 type Token string
 
@@ -27,8 +30,12 @@ type SessionStorage interface {
 }
 
 func generateToken() string {
-	b := make([]byte, 16)
-	_, _ = rand.Read(b)
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	rand.Seed(time.Now().UnixNano())
+	b := make([]rune, 64)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
 
 	return string(b)
 }
