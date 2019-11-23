@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/3auris/auction-server/api"
 	"github.com/3auris/auction-server/app"
 	"github.com/gorilla/handlers"
 )
@@ -17,7 +18,7 @@ func main() {
 }
 
 func run() error {
-	server := app.NewServer()
+	server := api.NewServer(app.NewApp())
 
 	return http.ListenAndServe(":3000", handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(server))
 }

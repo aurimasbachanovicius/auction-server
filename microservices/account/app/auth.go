@@ -1,44 +1,25 @@
 package app
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
+	"github.com/pkg/errors"
 
 	"github.com/3auris/auction-server/internal/user"
 )
 
-func (s Server) handleAuthentication() http.HandlerFunc {
-	type request struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+// Auth user and create new user session
+func (app App) Auth(email string, pass string) (error, *user.Session) {
+	storedUser := app.store.User.GetByEmail(email)
+	if storedUser == nil {
+		return errors.New("could not find user by email"), nil
 	}
 
-	type response struct {
-		UserSession user.Session `json:"user_session"`
-		User        user.User    `json:"user"`
+	password := app.store.UserPassword.GetByEmail(email)
+	if password.IsMatch(pass) == false {
+		return errors.New("could not match password"), nil
 	}
 
-	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			// todo handle it
-			panic(err)
-		}
+	session := user.NewSession();
+	app.store.UserSession.Add(session)
 
-		var request request
-		_ = json.Unmarshal(body, request)
-
-		w.WriteHeader(200)
-
-		response := response{
-			User:        user.NewUser(request.Email),
-			UserSession: user.NewSession(),
-		}
-
-		responseJson, _ := json.Marshal(response)
-
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write(responseJson)
-	}
+	return nil, &session
 }
