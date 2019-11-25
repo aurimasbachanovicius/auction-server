@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
 
@@ -44,14 +43,15 @@ func (Server) encodeAndRespond(w http.ResponseWriter, r *http.Request, response 
 	_, _ = w.Write(marshaled)
 }
 
-func (Server) decode(w http.ResponseWriter, r *http.Request, response interface{}) error {
+func (s *Server) decode(w http.ResponseWriter, r *http.Request, response interface{}) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return errors.Wrap(err, "could not read from body")
+		s.encodeAndRespond(w, r, new(interface{}), http.StatusBadRequest)
+		return
 	}
 
-	return errors.Wrap(
-		json.Unmarshal(body, response),
-		"could not unmarshal body",
-	)
+	err = json.Unmarshal(body, response)
+	if err != nil {
+		s.encodeAndRespond(w, r, new(interface{}), http.StatusBadRequest)
+	}
 }

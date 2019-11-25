@@ -4,6 +4,24 @@ import (
 	"net/http"
 )
 
+func (s Server) handleRegistration() http.HandlerFunc {
+	type request struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	type response struct {
+		Success bool `json:"success"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		var request request
+		s.decode(w, r, request)
+		response := response{Success: false}
+		s.encodeAndRespond(w, r, response, 200)
+	}
+}
+
 func (s Server) handleAuthentication() http.HandlerFunc {
 	type request struct {
 		Email    string `json:"email"`
@@ -20,12 +38,7 @@ func (s Server) handleAuthentication() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request request
-
-		err := s.decode(w, r, &request)
-		if err != nil {
-			s.encodeAndRespond(w, r, unauthorized, http.StatusBadRequest)
-			return
-		}
+		s.decode(w, r, &request)
 
 		err, session := s.app.Auth(request.Email, request.Password)
 		if err != nil {
