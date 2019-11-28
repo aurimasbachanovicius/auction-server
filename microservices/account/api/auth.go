@@ -40,7 +40,7 @@ func (s Server) handleAuthentication() http.HandlerFunc {
 		var request request
 		s.decode(w, r, &request)
 
-		err, session := s.app.Auth(request.Email, request.Password)
+		session, err := s.app.Auth(request.Email, request.Password)
 		if err != nil {
 			s.encodeAndRespond(w, r, unauthorized, http.StatusBadRequest)
 			return

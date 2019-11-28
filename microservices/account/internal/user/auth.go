@@ -27,9 +27,5 @@ func (hashedPassword HashedPassword) IsMatch(pass string) bool {
 
 type PasswordStorage interface {
 	GetByEmail(email string) HashedPassword
-	AddOrChangeToEmail(email string, password string) HashedPassword
-}
-
-func AuthenticateUser(auth Authenticator, email string, pass string) (error, User) {
-	return nil, User{}
+	AddOrChangeToEmail(email string, password string)
 }

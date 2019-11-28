@@ -16,11 +16,11 @@ func TestServer_handleAuthentication(t *testing.T) {
 	"email": "admin@admin.com",
 	"password":"admin"
 }`)
-
 	var buf bytes.Buffer
 	buf.Write(payload)
 
 	srv := NewServer(app.NewApp())
+
 	r := httptest.NewRequest(http.MethodPost, apiPrefix+"/authenticate", &buf)
 	w := httptest.NewRecorder()
 

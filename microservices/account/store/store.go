@@ -17,6 +17,6 @@ func NewMemoryStorage() *Storage {
 	return &Storage{
 		User:         userStorage,
 		UserSession:  userStorage,
-		UserPassword: memory.UserPasswordStorage{},
+		UserPassword: memory.NewUserPasswordStorage(),
 	}
 }

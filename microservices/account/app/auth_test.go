@@ -8,16 +8,20 @@ import (
 	"github.com/3auris/auction-server/store"
 )
 
-var sessionMock = &user.Session{}
-var addedSession = false
+var (
+	sessionMock = &user.Session{}
+	adminPass   = user.NewHashedPassword("admin")
+)
 
 type userStorageMock struct {
 	user.Storage
 	user.SessionStorage
+
+	onCall func()
 }
 
-func (s userStorageMock) Add(session user.Session) { addedSession = true }
-
+func (s userStorageMock) Add(session user.Session) { s.onCall() }
+func (s userStorageMock) Create(user user.User)    { s.onCall() }
 func (s userStorageMock) GetByEmail(email string) *user.User {
 	if email != "admin@admin.com" {
 		return nil
@@ -25,11 +29,13 @@ func (s userStorageMock) GetByEmail(email string) *user.User {
 	return &user.User{}
 }
 
-type userPasswordStorageMock struct{ user.PasswordStorage }
-
-func (u userPasswordStorageMock) GetByEmail(email string) user.HashedPassword {
-	return user.NewHashedPassword("admin")
+type userPasswordStorageMock struct {
+	user.PasswordStorage
+	onCall func()
 }
+
+func (u userPasswordStorageMock) GetByEmail(email string) user.HashedPassword      { return adminPass }
+func (u userPasswordStorageMock) AddOrChangeToEmail(email string, password string) { u.onCall() }
 
 func TestApp_Auth(t *testing.T) {
 	tests := []struct {
@@ -49,18 +55,24 @@ func TestApp_Auth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("given email:%s and pass:%s", tt.email, tt.pass), func(t *testing.T) {
-			addedSession = false
-			userStorageMock := userStorageMock{}
+			usrStg := userStorageMock{}
+
+			var addSession bool
+			usrSessionStg := userStorageMock{onCall: func() {
+				addSession = true
+			}}
+
+			passStg := userPasswordStorageMock{}
 
 			app := App{
 				store: &store.Storage{
-					User:         userStorageMock,
-					UserSession:  userStorageMock,
-					UserPassword: userPasswordStorageMock{},
+					User:         &usrStg,
+					UserSession:  &usrSessionStg,
+					UserPassword: &passStg,
 				},
 			}
 
-			err, session := app.Auth(tt.email, tt.pass)
+			session, err := app.Auth(tt.email, tt.pass)
 
 			if tt.want1 != "" {
 				if err == nil || err.Error() != tt.want1 {
@@ -72,10 +84,61 @@ func TestApp_Auth(t *testing.T) {
 				t.Errorf("Auth() want session %v, got %v", tt.want2, session)
 			}
 
-			if tt.addedSession != addedSession {
-				t.Errorf("Auth() want add to session %t, got %t", tt.addedSession, addedSession)
+			if tt.addedSession != addSession {
+				t.Errorf("Auth() want add to session %t, got %t", tt.addedSession, addSession)
 			}
 
+		})
+	}
+}
+
+func TestApp_NewUser(t *testing.T) {
+	tests := []struct {
+		email string
+		pass  string
+
+		err bool
+
+		addedUser         bool
+		addedUserPassword bool
+	}{
+		{email: "test@test.com", pass: "test", addedUser: true, addedUserPassword: true},
+		{email: "admin@admin.com", pass: "test", err: true},
+		{email: "admin@admin.com", pass: "admin", err: true},
+		{email: "admin@user.com", pass: "admin", addedUser: true, addedUserPassword: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("given email:%s and pass:%s", tt.email, tt.pass), func(t *testing.T) {
+			var addUser, addPass bool
+
+			passStg := userPasswordStorageMock{onCall: func() {
+				addPass = true
+			}}
+			userStg := userStorageMock{onCall: func() {
+				addUser = true
+			}}
+
+			app := App{
+				store: &store.Storage{
+					User:         &userStg,
+					UserSession:  &userStg,
+					UserPassword: &passStg,
+				},
+			}
+
+			err := app.NewUser(tt.email, tt.pass)
+			if err != nil && !tt.err {
+				t.Errorf("NewUser() do not want error, got: %v", err)
+			}
+
+			if tt.addedUser != addUser {
+				t.Errorf("NewUser() should add user to store, want:%t , got: %t", tt.addedUser, addUser)
+			}
+
+			if tt.addedUserPassword != addPass {
+				t.Errorf("NewUser() should add user's password to store, want:%t , got: %t", tt.addedUser, addPass, )
+			}
 		})
 	}
 }

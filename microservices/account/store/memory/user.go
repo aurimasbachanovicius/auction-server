@@ -14,7 +14,6 @@ func NewUserMemoryStorage() *UserMemoryStorage {
 	return &UserMemoryStorage{
 		users: users{
 			"admin": user.User{
-				Avatar:  "",
 				Email:   "admin@admin.com",
 				Name:    "AdminName",
 				Surname: "AdminSurname",
@@ -31,6 +30,10 @@ func NewUserMemoryStorage() *UserMemoryStorage {
 func (u UserMemoryStorage) GetByEmail(email string) *user.User {
 	usr := u.users[email]
 	return &usr
+}
+
+func (u *UserMemoryStorage) Create(user user.User) {
+	u.users[user.Email] = user
 }
 
 func (u UserMemoryStorage) Get(token user.Token) *user.Session {
