@@ -44,11 +44,6 @@ jobs:
       - setup_remote_docker
       - run:
           command: |
-            pwd
-            ls proxy
-            ls microservices
-      - run:
-          command: |
             gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/ca.pem.gpg > ./cert/ca.pem
             gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/key.pem.gpg > ./cert/key.pem
             gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/cert.pem.gpg > ./cert/cert.pem
