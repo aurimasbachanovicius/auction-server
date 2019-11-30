@@ -34,15 +34,17 @@ func (s Server) handleAuthentication() http.HandlerFunc {
 		Email  string `json:"email"`
 	}
 
-	var unauthorized = struct{ Error string `json:"error"` }{Error: "wrong credentials"}
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request request
 		s.decode(w, r, &request)
 
 		session, err := s.app.Auth(request.Email, request.Password)
 		if err != nil {
-			s.encodeAndRespond(w, r, unauthorized, http.StatusBadRequest)
+			s.encodeAndRespond(w, r, struct {
+				Error string `json:"error"`
+			}{
+				Error: "wrong credentials",
+			}, http.StatusBadRequest)
 			return
 		}
 
