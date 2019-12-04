@@ -37,9 +37,6 @@ jobs:
     docker:
       - image: circleci/buildpack-deps:stretch
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "24:e4:e0:90:fe:f5:d4:e4:40:f0:b2:fe:52:5f:85:d2"
       - checkout
       - setup_remote_docker
       - run:
