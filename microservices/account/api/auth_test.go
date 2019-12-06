@@ -67,5 +67,4 @@ func TestServer_RegisterAndAuthenticate(t *testing.T) {
 			}(t, server)
 		})
 	}
-
 }
