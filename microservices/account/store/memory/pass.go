@@ -1,6 +1,10 @@
 package memory
 
-import "github.com/3auris/auction-server/internal/user"
+import (
+	"errors"
+
+	"github.com/3auris/auction-server/internal/user"
+)
 
 type passwords map[string]user.HashedPassword
 
@@ -14,10 +18,16 @@ func NewUserPasswordStorage() *UserPasswordStorage {
 	}
 }
 
-func (ups UserPasswordStorage) GetByEmail(email string) user.HashedPassword {
-	return ups.passwords[email]
+func (ups UserPasswordStorage) GetByEmail(email string) (user.HashedPassword, error) {
+	pass, ok := ups.passwords[email]
+	if !ok {
+		return nil, errors.New("could not find user's password")
+	}
+
+	return pass, nil
 }
 
-func (ups *UserPasswordStorage) AddOrChangeToEmail(email string, password string) {
+func (ups *UserPasswordStorage) AddOrChangeToEmail(email, password string) error {
 	ups.passwords[email] = user.NewHashedPassword(password)
+	return nil
 }

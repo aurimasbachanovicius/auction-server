@@ -46,12 +46,12 @@ func (Server) encodeAndRespond(w http.ResponseWriter, r *http.Request, response 
 func (s *Server) decode(w http.ResponseWriter, r *http.Request, response interface{}) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		s.encodeAndRespond(w, r, new(interface{}), http.StatusBadRequest)
+		s.encodeAndRespond(w, r, struct{}{}, http.StatusBadRequest)
 		return
 	}
 
 	err = json.Unmarshal(body, response)
 	if err != nil {
-		s.encodeAndRespond(w, r, new(interface{}), http.StatusBadRequest)
+		s.encodeAndRespond(w, r, struct{}{}, http.StatusBadRequest)
 	}
 }

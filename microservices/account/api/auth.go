@@ -10,15 +10,19 @@ func (s Server) handleRegistration() http.HandlerFunc {
 		Password string `json:"password"`
 	}
 
-	type response struct {
-		Success bool `json:"success"`
+	type errResponse struct {
+		Error string `json:"error"`
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		var request request
-		s.decode(w, r, request)
-		response := response{Success: false}
-		s.encodeAndRespond(w, r, response, 200)
+		var req request
+		s.decode(w, r, &req)
+
+		if err := s.app.NewUser(req.Email, req.Password); err != nil {
+			s.encodeAndRespond(w, r, errResponse{Error: err.Error()}, http.StatusBadRequest)
+		}
+
+		s.encodeAndRespond(w, r, struct{}{}, http.StatusOK)
 	}
 }
 

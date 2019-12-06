@@ -19,8 +19,9 @@ type User struct {
 }
 
 type Storage interface {
-	GetByEmail(email string) *User
-	Create(user User)
+	GetByEmail(email string) (*User, error)
+	Exists(email string) (bool, error)
+	Create(user User) error
 }
 
 func (u User) Validate() error {

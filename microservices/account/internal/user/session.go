@@ -25,8 +25,8 @@ func NewSession() Session {
 }
 
 type SessionStorage interface {
-	Get(token Token) *Session
-	Add(session Session)
+	Get(token Token) (*Session, error)
+	Add(session Session) error
 }
 
 func generateToken() string {
