@@ -25,9 +25,9 @@ func TestServer_RegisterAndAuthenticate(t *testing.T) {
 			authPayload:    `{"email": "admin@admin.com","password":"admin"}`,
 			authStatusCode: http.StatusOK,
 		},
-		"auth should fail": {
+		"auth should fail because user's password is wrong": {
 			registerPayload:    `{"email": "admin@admin.com","password":"admin123"}`,
-			registerStatusCode: http.StatusBadRequest,
+			registerStatusCode: http.StatusOK,
 
 			authPayload:    `{"email": "admin@admin.com","password":"admin"}`,
 			authStatusCode: http.StatusBadRequest,
@@ -47,21 +47,21 @@ func TestServer_RegisterAndAuthenticate(t *testing.T) {
 
 				server.handleRegistration()(w, r)
 
-				if w.Code != http.StatusOK {
+				if w.Code != tt.registerStatusCode {
 					t.Errorf("wrong status code: got: %d, expected: %d", w.Code, tt.registerStatusCode)
 				}
 			}(t, server)
 
 			func(t *testing.T, server *Server) {
 				var buf bytes.Buffer
-				buf.Write([]byte(tt.registerPayload))
+				buf.Write([]byte(tt.authPayload))
 
 				r := httptest.NewRequest(http.MethodPost, apiPrefix+"/authenticate", &buf)
 				w := httptest.NewRecorder()
 
 				server.handleAuthentication()(w, r)
 
-				if w.Code != http.StatusOK {
+				if w.Code != tt.authStatusCode {
 					t.Errorf("wrong status code: got: %d, expected: %d", w.Code, tt.authStatusCode)
 				}
 			}(t, server)
