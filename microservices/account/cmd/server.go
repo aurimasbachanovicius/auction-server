@@ -20,5 +20,8 @@ func main() {
 func run() error {
 	server := api.NewServer(app.NewApp())
 
-	return http.ListenAndServe(":3000", handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(server))
+	return http.ListenAndServe(
+		":3000",
+		handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(server),
+	)
 }
