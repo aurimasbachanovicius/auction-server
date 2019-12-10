@@ -13,7 +13,11 @@ import (
 func main() {
 	err := run()
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+		_, err = fmt.Fprintf(os.Stderr, "%s\n", err)
+		if err != nil {
+			os.Exit(2)
+		}
+
 		os.Exit(1)
 	}
 }
