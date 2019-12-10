@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 	router.HandleFunc(prefix+"/health", alive).Methods(http.MethodGet)
 	router.HandleFunc(prefix+"/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
-		_, _ = w.Write([]byte("product microservice"));
+		_, _ = w.Write([]byte("product microservice"))
 	}).Methods(http.MethodGet)
 
 	err := http.ListenAndServe(":3000", handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(router))
