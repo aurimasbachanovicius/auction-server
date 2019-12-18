@@ -1,7 +1,6 @@
 [global]
   checkNewVersion = true
   sendAnonymousUsage = true
-  defaultMiddlewares = ["redirect"]
 
 [providers]
   [providers.docker]

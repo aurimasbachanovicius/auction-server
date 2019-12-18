@@ -33,6 +33,11 @@ services:
       - traefik-logs:/log
     deploy:
       mode: global
+      labels:
+        - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+        - "traefik.http.routers.http-catchall.entrypoints=web"
+        - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       placement:
         constraints:
           - node.role == manager
