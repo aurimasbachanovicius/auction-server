@@ -26,13 +26,11 @@
 
 [entryPoints]
   [entryPoints.web]
-    address = ":80"
-
+     address = ":80"
   [entryPoints.web-secure]
-    address = ":443"
+     address = ":443"
 
-[certificatesResolvers.sample.acme]
+[certificatesResolvers.le.acme]
   email = "aurimas.bachanovicius@gmail.com"
-  storage = "acme.json"
-  [certificatesResolvers.sample.acme.httpChallenge]
-    entryPoint = "web"
+  storage = "/acme.json"
+  [certificatesResolvers.le.acme.tlsChallenge]

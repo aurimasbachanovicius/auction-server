@@ -25,6 +25,9 @@ volumes:
 services:
   reverse-proxy:
     image: traefik:v2.0
+    depends_on:
+      - traefik-proxy
+      - monitoring-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - traefik-logs:/log
@@ -65,7 +68,9 @@ services:
       - '--web.enable-lifecycle'
     deploy:
       labels:
-        - traefik.http.routers.prometheus.rule=PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheus.rule=Host(`server.mybid.lt`) && PathPrefix(`/prometheus`)
+        - traefik.http.routers.prometheus.tls=true
+        - traefik.http.routers.prometheus.tls.certresolver=le
         - traefik.http.services.prometheus.loadbalancer.server.port=9090
       placement:
         constraints:
@@ -90,7 +95,9 @@ services:
         constraints:
           - node.role==manager
       labels:
-        - traefik.http.routers.grafana.rule=PathPrefix(`/grafana`)
+        - traefik.http.routers.grafana.rule=Host(`server.mybid.lt`) && PathPrefix(`/grafana`)
+        - traefik.http.routers.grafana.tls=true
+        - traefik.http.routers.grafana.tls.certresolver=le
         - traefik.http.services.grafana.loadbalancer.server.port=3000
     configs:
       - source: grafana-config

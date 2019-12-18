@@ -5,7 +5,9 @@ services:
     image: 3auris/auction-account
     deploy:
       labels:
-        - traefik.http.routers.account-api.rule=PathPrefix(`/v1/account/`)
+        - traefik.http.routers.account-api.rule=Host(`server.mybid.lt`) && PathPrefix(`/v1/account/`)
+        - traefik.http.routers.account-api.tls=true
+        - traefik.http.routers.account-api.tls.certresolver=le
         - traefik.http.services.account-api.loadbalancer.healthcheck.path=/v1/account/health
         - traefik.http.services.account-api.loadbalancer.server.port=3000
     networks:
