@@ -34,7 +34,3 @@
   email = "aurimas.bachanovicius@gmail.com"
   storage = "/acme.json"
   [certificatesResolvers.le.acme.tlsChallenge]
-
-[http.middlewares]
-  [http.middlewares.redirect.redirectScheme]
-    scheme = "https"
