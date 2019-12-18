@@ -5,14 +5,14 @@ import (
 	"github.com/3auris/auction-server/store/memory"
 )
 
-//Storage main structure of storage of application
+// Storage main structure of storage of application
 type Storage struct {
 	User         user.Storage
 	UserSession  user.SessionStorage
 	UserPassword user.PasswordStorage
 }
 
-//NewMemoryStorage creates new storage with all dependencies
+// NewMemoryStorage creates new storage with all dependencies
 func NewMemoryStorage() *Storage {
 	userStorage := memory.NewUserMemoryStorage()
 

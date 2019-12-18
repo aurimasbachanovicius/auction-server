@@ -9,14 +9,14 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//Server for providing api
+// Server for providing api
 type Server struct {
 	router *mux.Router
 
 	app app.App
 }
 
-//NewServer creates new Server with routes and server dependencies
+// NewServer creates new Server with routes and server dependencies
 func NewServer(app app.App) *Server {
 	server := Server{
 		router: mux.NewRouter(),
