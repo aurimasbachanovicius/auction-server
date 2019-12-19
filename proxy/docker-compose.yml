@@ -26,9 +26,6 @@ volumes:
 services:
   reverse-proxy:
     image: traefik:v2.0
-    depends_on:
-      - traefik-proxy
-      - monitoring-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - traefik-certificates:/letsencrypt
@@ -61,8 +58,6 @@ services:
 
   prometheus:
     image: prom/prometheus
-    depends_on:
-      - reverse-proxy
     volumes:
       - prometheus-data:/prometheus
     command:
@@ -89,8 +84,6 @@ services:
 
   grafana:
     image: grafana/grafana
-    depends_on:
-      - prometheus
     volumes:
       - grafana-data:/var/lib/grafana
       - grafana-profisioning-data:/etc/grafana/provisioning/
