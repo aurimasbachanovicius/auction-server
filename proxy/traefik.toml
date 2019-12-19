@@ -32,5 +32,5 @@
 
 [certificatesResolvers.le.acme]
   email = "aurimas.bachanovicius@gmail.com"
-  storage = "/acme.json"
+  storage = "/letsencrypt/acme.json"
   [certificatesResolvers.le.acme.tlsChallenge]

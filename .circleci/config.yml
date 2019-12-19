@@ -44,6 +44,7 @@ jobs:
             gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/ca.pem.gpg > ./cert/ca.pem
             gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/key.pem.gpg > ./cert/key.pem
             gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/cert.pem.gpg > ./cert/cert.pem
+            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack rm auction
             docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./proxy/docker-compose.yml auction
             docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/account/docker-compose.yml auction
             docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/product/docker-compose.yml auction
