@@ -32,6 +32,11 @@ services:
       - traefik-logs:/log
     deploy:
       mode: global
+      labels:
+        - traefik.http.services.traefik.loadbalancer.server.port=8080
+        - traefik.http.routers.traefik.rule=Host(`server.mybid.lt`)
+        - traefik.http.routers.traefik.tls=true
+        - traefik.http.routers.traefik.tls.certresolver=le
       placement:
         constraints:
           - node.role == manager
