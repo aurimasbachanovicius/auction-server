@@ -18,6 +18,8 @@ configs:
 
 volumes:
   traefik-logs: {}
+  acme:
+    external: false
   prometheus-data: {}
   grafana-data: {}
   grafana-profisioning-data: {}
@@ -30,6 +32,7 @@ services:
       - monitoring-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - acme:/acme.json
       - traefik-logs:/log
     deploy:
       mode: global
