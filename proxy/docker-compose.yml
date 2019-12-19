@@ -18,7 +18,7 @@ configs:
 
 volumes:
   traefik-logs: {}
-  traefik-certificates: {}
+  traefik-cert: {}
   prometheus-data: {}
   grafana-data: {}
   grafana-profisioning-data: {}
@@ -28,7 +28,7 @@ services:
     image: traefik:v2.0
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - traefik-certificates:/letsencrypt
+      - traefik-cert:/letsencrypt/
       - traefik-logs:/log
     deploy:
       mode: global
