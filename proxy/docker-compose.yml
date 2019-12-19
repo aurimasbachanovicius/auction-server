@@ -32,7 +32,7 @@ services:
       - monitoring-network
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - acme:/acme.json
+      - /acme.json:/acme.json
       - traefik-logs:/log
     deploy:
       mode: global
