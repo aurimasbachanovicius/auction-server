@@ -33,6 +33,10 @@ services:
       - traefik-logs:/log
     deploy:
       mode: global
+      labels:
+        - traefik.http.routers.reverse-proxy.rule=Host(`server.mybid.lt`)
+        - traefik.http.routers.reverse-proxy.tls=true
+        - traefik.http.routers.reverse-proxy.tls.certresolver=le
       placement:
         constraints:
           - node.role == manager
