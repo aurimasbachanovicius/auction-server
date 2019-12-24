@@ -32,3 +32,9 @@
   email = "aurimas.bachanovicius@gmail.com"
   storage = "/letsencrypt/acme.json"
   [certificatesResolvers.le.acme.tlsChallenge]
+
+[http.middlewares]
+  [http.middlewares.auth.basicAuth]
+    users = [
+      "3auris:$apr1$foeiE63M$ngdCwpxXZ5fBRewdGt1Zj/",
+    ]

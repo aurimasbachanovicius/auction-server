@@ -36,7 +36,6 @@ services:
         - traefik.http.routers.api.rule=Host(`traefik.mybid.lt`)
         - traefik.http.routers.api.service=api@internal
         - traefik.http.routers.api.middlewares=auth
-        - traefik.http.middlewares.auth.basicauth.users=3auris:$$apr1$$ielLDfUP$$hv90BjPn8EJUwNz3TQgOK1
         - traefik.http.services.dummy-svc.loadbalancer.server.port=9999
       placement:
         constraints:
@@ -76,7 +75,6 @@ services:
         - traefik.http.routers.prometheus.tls.certresolver=le
         - traefik.http.services.prometheus.loadbalancer.server.port=9090
         - traefik.http.routers.prometheus.middlewares=auth
-        - traefik.http.middlewares.auth.basicauth.users=3auris:$$apr1$$o.NpWPox$$kNfB7jsJoFrb/L4kftink0
       placement:
         constraints:
           - node.role==manager
@@ -103,7 +101,6 @@ services:
         - traefik.http.routers.grafana.tls.certresolver=le
         - traefik.http.services.grafana.loadbalancer.server.port=3000
         - traefik.http.routers.grafana.middlewares=auth
-        - traefik.http.middlewares.auth.basicauth.users=3auris:$$apr1$$e4oJoOrk$$im71TufhY6oWnsKprZsjx1
     configs:
       - source: grafana-config
         target: /etc/grafana/grafana.ini
