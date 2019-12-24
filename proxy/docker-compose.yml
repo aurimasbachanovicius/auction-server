@@ -64,9 +64,9 @@ services:
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/'
+      - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.external-url=http://localhost/prometheus'
+      - '--web.external-url=http://localhost/'
       - '--web.console.templates=/usr/share/prometheus/consoles'
       - '--web.enable-lifecycle'
     deploy:
@@ -75,7 +75,8 @@ services:
         - traefik.http.routers.prometheus.tls=true
         - traefik.http.routers.prometheus.tls.certresolver=le
         - traefik.http.services.prometheus.loadbalancer.server.port=9090
-        - traefik.http.middlewares.prometheus.basicauth.users=3auris:$$apr1$$o.NpWPox$$kNfB7jsJoFrb/L4kftink0
+        - traefik.http.routers.prometheus.middlewares=auth
+        - traefik.http.middlewares.auth.basicauth.users=3auris:$$apr1$$o.NpWPox$$kNfB7jsJoFrb/L4kftink0
       placement:
         constraints:
           - node.role==manager
@@ -101,7 +102,8 @@ services:
         - traefik.http.routers.grafana.tls=true
         - traefik.http.routers.grafana.tls.certresolver=le
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-        - traefik.http.middlewares.grafana.basicauth.users=3auris:$$apr1$$e4oJoOrk$$im71TufhY6oWnsKprZsjx1
+        - traefik.http.routers.grafana.middlewares=auth
+        - traefik.http.middlewares.auth.basicauth.users=3auris:$$apr1$$e4oJoOrk$$im71TufhY6oWnsKprZsjx1
     configs:
       - source: grafana-config
         target: /etc/grafana/grafana.ini
