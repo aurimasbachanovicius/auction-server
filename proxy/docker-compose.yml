@@ -37,7 +37,7 @@ services:
         - traefik.http.routers.api.service=api@internal
         - traefik.http.routers.api.tls=true
         - traefik.http.routers.api.tls.certresolver=le
-        - traefik.http.routers.api.middlewares=auth
+        #        - traefik.http.routers.api.middlewares=auth
         - traefik.http.services.dummy-svc.loadbalancer.server.port=9999
       placement:
         constraints:
@@ -76,7 +76,7 @@ services:
         - traefik.http.routers.prometheus.tls=true
         - traefik.http.routers.prometheus.tls.certresolver=le
         - traefik.http.services.prometheus.loadbalancer.server.port=9090
-        - traefik.http.routers.prometheus.middlewares=auth
+      #        - traefik.http.routers.prometheus.middlewares=auth
       placement:
         constraints:
           - node.role==manager
@@ -102,7 +102,7 @@ services:
         - traefik.http.routers.grafana.tls=true
         - traefik.http.routers.grafana.tls.certresolver=le
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-        - traefik.http.routers.grafana.middlewares=auth
+    #        - traefik.http.routers.grafana.middlewares=auth
     configs:
       - source: grafana-config
         target: /etc/grafana/grafana.ini
