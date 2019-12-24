@@ -64,7 +64,7 @@ services:
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.path=/'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.external-url=http://localhost/prometheus'
       - '--web.console.templates=/usr/share/prometheus/consoles'
