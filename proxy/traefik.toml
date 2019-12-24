@@ -10,9 +10,7 @@
     swarmMode = true
 
 [api]
-  insecure = true
   dashboard = true
-  debug = true
 
 [log]
   level = "error"
