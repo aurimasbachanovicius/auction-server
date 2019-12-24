@@ -33,9 +33,7 @@ services:
     deploy:
       mode: global
       labels:
-        - traefik.http.routers.traefik.rule=Host(`server.mybid.lt`)
-        - traefik.http.routers.traefik.tls=true
-        - traefik.http.routers.traefik.tls.certresolver=le
+        - traefik.http.routers.api.rule=Host(`traefik.mybid.lt`)
         - traefik.http.routers.api.service=api@internal
         - traefik.http.routers.api.middlewares=auth
         - traefik.http.middlewares.auth.basicauth.users=3auris:$$apr1$$ielLDfUP$$hv90BjPn8EJUwNz3TQgOK1
