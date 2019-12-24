@@ -107,5 +107,3 @@ services:
         target: /etc/grafana/grafana.ini
     networks:
       - monitoring
-    environment:
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana
