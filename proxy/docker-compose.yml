@@ -35,6 +35,8 @@ services:
       labels:
         - traefik.http.routers.api.rule=Host(`traefik.mybid.lt`)
         - traefik.http.routers.api.service=api@internal
+        - traefik.http.routers.api.tls=true
+        - traefik.http.routers.api.tls.certresolver=le
         - traefik.http.routers.api.middlewares=auth
         - traefik.http.services.dummy-svc.loadbalancer.server.port=9999
       placement:
