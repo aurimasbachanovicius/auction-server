@@ -10,20 +10,23 @@ image-build: &image-build
     - run:
         command: |
           docker build -t $USER/$NAME $DIR
-          docker save $USER/$NAME > auction-img.tar
+          docker save $USER/$NAME > $NAME.tar
     - run: ls -la
     - run: pwd
     - persist_to_workspace:
         root: .
-        paths: auction-img.tar
+        paths: $NAME.tar
 
 image-push: &image-push
   machine: true
+  working_directory: ~/auction
   steps:
     - attach_workspace:
         at: ~/auction
     - run:
         command: |
+          ls -la
+          pwd
           docker load < $NAME.tar
           echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
           docker push $USER/$NAME
