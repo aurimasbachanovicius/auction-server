@@ -1,4 +1,28 @@
-version: 2
+version:  2.1
+
+image-build: &image-build
+  machine: true
+  working_directory: ~/auction
+  steps:
+    - checkout
+    - attach_workspace:
+        at: ~/auction
+    - run: cd $DIR && docker build -t $USER/$NAME . && docker save $USER/$NAME > $NAME.tar
+    - persist_to_workspace:
+        root: .
+        paths: $NAME.tar
+
+image-push: &image-push
+  machine: true
+  steps:
+    - attach_workspace:
+        at: ~/auction
+    - run:
+        command: |
+          docker load < $NAME.tar
+          echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+          docker push $USER/$NAME
+
 jobs:
   tests:
     docker:
@@ -9,70 +33,94 @@ jobs:
           command: |
             (cd microservices/account && go test ./...)
             (cd microservices/product && go test)
-  product-image:
-    docker:
-      - image: circleci/buildpack-deps:stretch
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          command: |
-            cd microservices/product
-            docker build -t 3auris/auction-product .
-            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-            docker push 3auris/auction-product
-  account-image:
-    docker:
-      - image: circleci/buildpack-deps:stretch
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          command: |
-            cd microservices/account
-            docker build -t 3auris/auction-account .
-            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-            docker push 3auris/auction-account
-  deploy:
-    docker:
-      - image: circleci/buildpack-deps:stretch
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          command: |
-            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/ca.pem.gpg > ./cert/ca.pem
-            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/key.pem.gpg > ./cert/key.pem
-            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/cert.pem.gpg > ./cert/cert.pem
-            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack rm auction
-            sleep 7 # sleep to wait for all networks to be removed.
-            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./proxy/docker-compose.yml auction
-            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/account/docker-compose.yml auction
-            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/product/docker-compose.yml auction
+
+  build-product-image:
+    environment:
+      USER: 3auris
+      NAME: auction-product
+      DIR: microservices/product
+    <<: *image-build
+
+  build-account-image:
+    environment:
+      USER: 3auris
+      NAME: auction-account
+      DIR: microservices/account
+    <<: *image-build
+
+  push-product-image:
+    environment:
+      USER: 3auris
+      NAME: auction-product
+    <<: *image-push
+
+  push-account-image:
+    environment:
+      USER: 3auris
+      NAME: auction-account
+    <<: *image-push
+
+#  product-image:
+#    docker:
+#      - image: circleci/buildpack-deps:stretch
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          command: |
+#            cd microservices/product
+#            docker build -t 3auris/auction-product .
+#            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+#            docker push 3auris/auction-product
+#  account-image:
+#    docker:
+#      - image: circleci/buildpack-deps:stretch
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          command: |
+#            cd microservices/account
+#            docker build -t 3auris/auction-account .
+#            echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+#            docker push 3auris/auction-account
+#  deploy:
+#    docker:
+#      - image: circleci/buildpack-deps:stretch
+#    steps:
+#      - checkout
+#      - setup_remote_docker
+#      - run:
+#          command: |
+#            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/ca.pem.gpg > ./cert/ca.pem
+#            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/key.pem.gpg > ./cert/key.pem
+#            gpg --batch --no-tty --passphrase $KEY --decrypt ./cert/cert.pem.gpg > ./cert/cert.pem
+#            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack rm auction
+#            sleep 7 # sleep to wait for all networks to be removed.
+#            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./proxy/docker-compose.yml auction
+#            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/account/docker-compose.yml auction
+#            docker --tlsverify --tlscert=./cert/cert.pem --tlskey=./cert/key.pem --tlscacert=./cert/ca.pem -H $HOST:$PORT stack up -c ./microservices/product/docker-compose.yml auction
 workflows:
-  version: 2
+  version: 2.1
   build-deploy:
     jobs:
-      - tests:
-          filters:
-            branches:
-              only: master
-      - account-image:
+      - build-account-image
+      - push-account-image:
           requires:
-            - tests
-          filters:
-            branches:
-              only: master
-      - product-image:
-          requires:
-            - tests
-          filters:
-            branches:
-              only: master
-      - deploy:
-          requires:
-            - account-image
-            - product-image
-          filters:
-            branches:
-              only: master
+            - build-account-image
+
+#    jobs:
+#      - tests:
+#          filters:
+#            branches:
+#              only: master
+#      - account-image:
+#          requires:
+#            - tests
+#      - product-image:
+#          requires:
+#            - tests
+#      - deploy:
+#          requires:
+#            - account-image
+#            - product-image
