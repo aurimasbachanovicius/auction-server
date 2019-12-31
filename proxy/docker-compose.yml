@@ -60,6 +60,7 @@ services:
     networks:
       - traefik
       - monitoring
+      - agent_network
 
   prometheus:
     image: prom/prometheus
