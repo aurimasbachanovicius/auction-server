@@ -7,7 +7,11 @@ image-build: &image-build
     - checkout
     - attach_workspace:
         at: ~/auction
+    - run: ls
+    - run: pwd
     - run: cd $DIR && docker build -t $USER/$NAME . && docker save $USER/$NAME > auction-img.tar
+    - run: ls
+    - run: pwd
     - persist_to_workspace:
         root: .
         paths: auction-img.tar
