@@ -7,6 +7,9 @@ networks:
   monitoring:
     name: monitoring-network
     driver: overlay
+  agent_network:
+    driver: overlay
+    attachable: true
 
 configs:
   traefik-config:
@@ -22,6 +25,7 @@ volumes:
   prometheus-data: {}
   grafana-data: {}
   grafana-profisioning-data: {}
+  portainer_data: {}
 
 services:
   reverse-proxy:
@@ -37,11 +41,9 @@ services:
         - traefik.http.routers.api.service=api@internal
         - traefik.http.routers.api.tls=true
         - traefik.http.routers.api.tls.certresolver=le
-        #        - traefik.http.routers.api.middlewares=auth
         - traefik.http.services.dummy-svc.loadbalancer.server.port=9999
       placement:
-        constraints:
-          - node.role == manager
+        constraints: [node.role == manager]
     configs:
       - source: traefik-config
         target: ./traefik.toml
@@ -76,10 +78,8 @@ services:
         - traefik.http.routers.prometheus.tls=true
         - traefik.http.routers.prometheus.tls.certresolver=le
         - traefik.http.services.prometheus.loadbalancer.server.port=9090
-      #        - traefik.http.routers.prometheus.middlewares=auth
       placement:
-        constraints:
-          - node.role==manager
+        constraints: [node.role == manager]
     configs:
       - source: prometheus-config
         target: /etc/prometheus/prometheus.yml
@@ -95,16 +95,44 @@ services:
       - '--config=/etc/grafana/grafana.ini'
     deploy:
       placement:
-        constraints:
-          - node.role==manager
+        constraints: [node.role == manager]
       labels:
         - traefik.http.routers.grafana.rule=Host(`grafana.mybid.lt`)
         - traefik.http.routers.grafana.tls=true
         - traefik.http.routers.grafana.tls.certresolver=le
         - traefik.http.services.grafana.loadbalancer.server.port=3000
-    #        - traefik.http.routers.grafana.middlewares=auth
     configs:
       - source: grafana-config
         target: /etc/grafana/grafana.ini
     networks:
       - monitoring
+
+  portainer-agent:
+    image: portainer/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+
+  portainer:
+    image: portainer/portainer
+    command: -H tcp://tasks.portainer-agent:9001 --tlsskipverify
+    volumes:
+      - portainer_data:/data
+    networks:
+      - agent_network
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - traefik.http.routers.portainer.rule=Host(`portainer.mybid.lt`)
+        - traefik.http.routers.portainer.tls=true
+        - traefik.http.routers.portainer.tls.certresolver=le
+        - traefik.http.services.portainer.loadbalancer.server.port=8000
